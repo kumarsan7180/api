@@ -1,0 +1,29 @@
+trigger:
+- main
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'ACRServiceConnection2'   # This is ACR Service Connection Name
+  imageRepository: 'api'                                     # ACR repository where the image needs to be pushed
+  containerRegistry: '7180sandeepacr.azurecr.io'             # Name of the ACR 
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'     # Location where the Docker File is present for Build
+  tag: '$(Build.BuildId)'                                    # Tag on the build 
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      name: agentpool1                                       # Self Hosted agent pool
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
